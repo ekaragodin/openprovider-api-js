@@ -1,21 +1,19 @@
-var request = require('request');
-var {Builder, parseString, processors} = require('xml2js');
-var _ = require('lodash');
-var defaultUrl = 'https://api.openprovider.eu';
+const request = require('request');
+const {Builder, parseString, processors} = require('xml2js');
+const _ = require('lodash');
+const DEFAULT_URL = 'https://api.openprovider.eu';
 
-module.exports.xml = function (config) {
-    return function (requestName, args) {
-        var body = {};
-
-        body[requestName + 'Request'] = args || {};
-
-        return executeRequest(body, config);
+module.exports.xml = (config) => {
+    return (requestName, args = {}) => {
+        return executeRequest({
+            [requestName + 'Request']: args,
+        }, config);
     }
 };
 
 function executeRequest(body, config) {
-    return new Promise(function (resolve, reject) {
-        var builder = new Builder();
+    return new Promise((resolve, reject) => {
+        const builder = new Builder();
 
         body = mapToApi({
             openXML: Object.assign({
@@ -25,14 +23,14 @@ function executeRequest(body, config) {
 
         request({
             method: 'POST',
-            url: config.url || defaultUrl,
+            url: config.url || DEFAULT_URL,
             body: builder.buildObject(body),
             agentOptions: {
                 rejectUnauthorized: false
             },
-        }, function (error, response, body) {
+        }, (error, response, body) => {
             if (!error && response.statusCode) {
-                parseResponse(body, function (err, result) {
+                parseResponse(body, (err, result) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -56,7 +54,7 @@ function parseResponse(response, cb) {
                 processors.parseNumbers,
             ],
         },
-        function (err, result) {
+        (err, result) => {
             if (err) {
                 cb(err);
             } else {
@@ -66,10 +64,8 @@ function parseResponse(response, cb) {
 }
 
 function mapToApi(data) {
-    var result;
-
     if (_.isObject(data)) {
-        result = _.mapValues(data, function (value) {
+        return _.mapValues(data, (value) => {
             if (_.isArray(value)) {
                 return {
                     array: {
@@ -80,25 +76,19 @@ function mapToApi(data) {
 
             return mapToApi(value);
         });
-    } else {
-        result = data;
     }
 
-    return result;
+    return data;
 }
 
 function mapFromApi(data) {
-    var result;
-
     if (_.has(data, 'array.item')) {
-        result = [].concat(_.get(data, 'array.item'));
-    } else if (_.isObject(data)) {
-        result = _.mapValues(data, function (value) {
-            return mapFromApi(value);
-        });
-    } else {
-        result = data;
+        return [].concat(_.get(data, 'array.item'));
     }
 
-    return result;
+    if (_.isObject(data)) {
+        return _.mapValues(data, (value) => mapFromApi(value));
+    }
+
+    return data;
 }
