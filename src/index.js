@@ -1,6 +1,7 @@
 var request = require('request');
 var {Builder, parseString, processors} = require('xml2js');
 var _ = require('lodash');
+var defaultUrl = 'https://api.openprovider.eu';
 
 module.exports.xml = function (config) {
     return function (requestName, args) {
@@ -24,7 +25,7 @@ function executeRequest(body, config) {
 
         request({
             method: 'POST',
-            url: config.url,
+            url: config.url || defaultUrl,
             body: builder.buildObject(body),
             agentOptions: {
                 rejectUnauthorized: false
