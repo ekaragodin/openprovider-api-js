@@ -1,7 +1,7 @@
 {
   "name": "openprovider-api-js",
   "version": "1.0.0",
-  "description": "",
+  "description": "JavaScript client for openprovider api.",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,5 +11,10 @@
   "license": "Apache-2.0",
   "files": [
     "src"
-  ]
+  ],
+  "dependencies": {
+    "lodash": "^4.15.0",
+    "request": "^2.74.0",
+    "xml2js": "^0.4.17"
+  }
 }
